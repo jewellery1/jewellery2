@@ -221,18 +221,14 @@ display: inline-block;
   <form>
   Partyname:
   </form>
-  <form>
-   <!-- <select ng-model="partyname" class="selectpicker" ng-change="getDetails()">
-   <option ng-repeat="party in res" value="{{party.name}}">{{party.name}}</option> -->
-   <!-- <select ng-model="partyname" class="selectpicker" >
-  <option ng-repeat="party in res" value="{{party.name}}">{{party.name}}</option>
-</select> -->
+  <form style="border: 1px solid">
+   <input list="partyname">
+   <datalist id="partyname">
  <select ng-model="partyname" class="selectpicker" ng-change="getDetails();TransactionDetails()">
-<!--  <select ng-model="partyname" class="selectpicker" ng-change="getDetails()"> -->
 
- <!--  <option ng-repeat="party in res" value="{{party.name}}">{{party.name}}</option> -->
   <option ng-repeat="party in res" ng-cloak>{{party.name}}</option>
 </select>
+</datalist>
 </form>
 <!-- <form id="history">
 History:

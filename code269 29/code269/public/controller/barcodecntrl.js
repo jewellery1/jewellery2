@@ -385,71 +385,79 @@ $scope.saveBatchGeneration = function(){
               $scope.userit[0].voucherTime = "";
 
               if(tagdetails.composite == 'yes' ){
-                  for(let j = 0; j<4; j++){
-                    if($scope.userit[j].gwt != undefined){
-                       $scope.userit[j].compositeRef =  $scope.userit[0].barcode ;
-                      // $scope.userit[j].barcode  = $scope.userit[0].barcode ;
-                    console.log($scope.userit[j])
-                    $http.post('/transactionstock',$scope.userit[j]).success(function(response)
-             {  
-                 console.log("i got replay")
-                 console.log(response);
-                 $scope.usr = response
-                 console.log( $scope.usr);
-                // $scope.usr.StockPoint = "andin"
-                 $scope.usr.StockInward = "no"
-               // $scope.userit[0].orderstatus = "available"
-              // $scope.usr.Transaction = "Barcoding1"
-                 $scope.usr.orderstatus =""
-                 $scope.usr.refid = $scope.usr.barcode 
-                 $scope.usr.barcode = ""
-                 $scope.usr.StockPoint = stockout
-                 console.log( $scope.usr.StockPoint);
+                  for(let p = 0; p<4; p++){
+                    if($scope.userit[p].gwt != undefined){
+                        // alert('p '+p)
+                        $scope.userit[p].compositeRef =  $scope.userit[0].barcode ;
+                        // $scope.userit[j].barcode  = $scope.userit[0].barcode ;
+                        console.log($scope.userit[p])
+                        $http.post('/transactionstock',$scope.userit[p]).success(function(response){  
+                              console.log("i got replay")
+                              console.log(response);
+                              $scope.usr = response
+                              console.log( $scope.usr);
+                              // $scope.usr.StockPoint = "andin"
+                              $scope.usr.StockInward = "no"
+                              // $scope.userit[0].orderstatus = "available"
+                              // $scope.usr.Transaction = "Barcoding1"
+                               $scope.usr.orderstatus =""
+                               $scope.usr.refid = $scope.usr.barcode 
+                               $scope.usr.barcode = ""
+                               $scope.usr.StockPoint = stockout
+                               console.log( $scope.usr.StockPoint);
                  
                            
-             });
+                         });
 
-          console.log( $scope.userit[0].StockPoint);
+                          console.log( $scope.userit[0].StockPoint);
 
-         $http.post('/transactionstockInward',$scope.userit[j]).success(function(response)
-                       {  
-                             console.log("i got replay")
-                             console.log(response);
+                          $http.post('/transactionstockInward',$scope.userit[p]).success(function(response){  
+                                     console.log("i got replay")
+                                     console.log(response);
                            
-                       })
-                     }else{
-                      break;
-                     }
-                  }
+                          })
+
+                    }else{
+                            break;
+                         }
+                  }//for
+
               }else{
-       $http.post('/transactionstock',$scope.userit[0]).success(function(response)
-             {  
-                 console.log("i got replay")
-                 console.log(response);
-                 $scope.usr = response
-                 console.log( $scope.usr);
-                // $scope.usr.StockPoint = "andin"
-                 $scope.usr.StockInward = "no"
-               // $scope.userit[0].orderstatus = "available"
-              // $scope.usr.Transaction = "Barcoding1"
-                 $scope.usr.orderstatus =""
-                 $scope.usr.refid = $scope.usr.barcode 
-                 $scope.usr.barcode = ""
-                 $scope.usr.StockPoint = stockout
-                 console.log( $scope.usr.StockPoint);
+                       $http.post('/transactionstock',$scope.userit[0]).success(function(response){  
+                                 console.log("i got replay")
+                                 console.log(response);
+                                 $scope.usr = response
+                                 console.log( $scope.usr);
+                                 // $scope.usr.StockPoint = "andin"
+                                  $scope.usr.StockInward = "no"
+                                 // $scope.userit[0].orderstatus = "available"
+                                 // $scope.usr.Transaction = "Barcoding1"
+                                 $scope.usr.orderstatus =""
+                                 $scope.usr.refid = $scope.usr.barcode 
+                                 $scope.usr.barcode = ""
+                                 $scope.usr.StockPoint = stockout
+                                 console.log( $scope.usr.StockPoint);
                  
                            
-             });
+                      });
 
-          console.log( $scope.userit[0].StockPoint);
+                      console.log( $scope.userit[0].StockPoint);
 
-         $http.post('/transactionstockInward',$scope.userit[0]).success(function(response)
-                       {  
+                      $http.post('/transactionstockInward',$scope.userit[0]).success(function(response){  
                              console.log("i got replay")
                              console.log(response);
+
                            
                        })
-       }
+                       if( comboItemCheck  == "yes"){
+                             $http.post('/transactionComboItemInsert',$scope.userit[0]).success(function(response) {  
+                                        console.log("i got replay")
+                                        console.log(response);
+                             
+                               })             
+                       }
+
+                    }
 
            })
 
@@ -513,7 +521,7 @@ $scope.saveBatchGeneration = function(){
 
                                   }else if(diff <= 5){
                                       // color = red
-                                            for(j=0;j<= lgn-1;j++)
+                                            for(let j=0;j<= lgn-1;j++)
                                             {
                                               var data = arrpush[j]+","+ "gold";
                       
@@ -528,7 +536,7 @@ $scope.saveBatchGeneration = function(){
                         
                                   } else if(diff > 5){
                                      // color = red
-                                   for(j=0;j<= lgn-1;j++)
+                                   for(let j=0;j<= lgn-1;j++)
                                    // alert("entered diff > 5")
                                     {
                                        // alert(j)
@@ -607,14 +615,7 @@ $scope.bitem = [];
 $scope.saveBarcode = function()
 { //validation purpose
 
-//  $scope.bitem.titems = $scope.bitem.titems.toFixed(0);
-// $scope.bitem.wt = $scope.bitem.wt.toFixed(fixdec);
-//  $scope.bitem.pcs = $scope.bitem.pcs.toFixed(0);
-  //alert("value "+$scope.bitem.titems)
- // if($scope.bitem.date ||$scope.bitem.ItemName ||$scope.bitem.stockin  || $scope.bitem.stockout ||$scope.bitem.wt  || $scope.bitem.pcs  || $scope.bitem.titems == undefined){
-   // reload = 0;
-// if($scope.bitem.date ||$scope.bitem.ItemName ||$scope.bitem.stockin  || $scope.bitem.stockout  == undefined){
-  //if($scope.bitem.date == undefined ||$scope.bitem.ItemName == undefined ||$scope.bitem.stockin == undefined || $scope.bitem.stockout == undefined ||$scope.bitem.wt == undefined || $scope.bitem.pcs == undefined || $scope.bitem.titems == undefined){
+//if($scope.bitem.date == undefined ||$scope.bitem.ItemName == undefined ||$scope.bitem.stockin == undefined || $scope.bitem.stockout == undefined ||$scope.bitem.wt == undefined || $scope.bitem.pcs == undefined || $scope.bitem.titems == undefined){
    if($scope.bitem.ItemName == undefined ||$scope.bitem.stockin == undefined || $scope.bitem.stockout == undefined ||$scope.bitem.wt == undefined || $scope.bitem.pcs == undefined || $scope.bitem.titems == undefined){
   
   
@@ -874,11 +875,29 @@ $scope.edit = function(){
      console.log("edit call");
     console.log(edit1);
     if(edit1 != null){
-       $scope.userit[0] = edit1;
-       console.log( $scope.userit[0]);
-       $scope.itemSelect($scope.userit[0].itemName,0);
-       $scope.updateButton = true;
-       //edit1 = null;
+
+      
+       //alert(edit1.barcode)
+         $http.get('/codeDetails'+ edit1.barcode).success(function(response) {
+           // alert("reerer "+response)
+            console.log(response);
+            
+            console.log(response.length);
+            var editBarcodeLength = response.length ;
+            if(editBarcodeLength >0){
+              alert("The barcoded item is soldout!");
+            }else{
+                     $scope.userit[0] = edit1;
+                     console.log( $scope.userit[0]);
+                     $scope.itemSelect($scope.userit[0].itemName,0);
+                     $scope.updateButton = true;
+                     edit1 = null;
+
+                 }
+
+         })
+
+      
     }else{
       alert("Please Select Batch ")
 
@@ -1047,10 +1066,27 @@ $http.get('/lastrec/'+data).success(function(response){
   $scope.itemSelect(item1,0);
   
 }
+var comboItemCheck = null;
 $scope.itemSelect = function(itemname,in1) {
      // alert("itemSelect itemSelect "+in1+itemname)
      // console.log($scope.userit[in1])
      // $scope.userit[in1].itemName =itemname 
+     //check for combo or not
+       $http.get('/checkofcomboitem/'+itemname).success(function(response) { 
+           
+                //console.log("i got replay form confirm")
+                console.log(response);
+                //alert(response[0].comboItem);
+                 if(response[0].comboItem == "yes"){
+                      comboItemCheck = 'yes';
+                      $scope.userit[in1].comboItem = 'yes';
+                 }else{
+                          comboItemCheck = 'no';
+                          $scope.userit[in1].comboItem =  'no';
+                      }
+       })
+                
+           
      if(in1 > 0){
        $scope.userit[in1].uom = "Carats";
      }   

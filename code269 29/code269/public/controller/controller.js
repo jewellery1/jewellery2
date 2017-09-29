@@ -850,7 +850,33 @@ $scope.findWeightTolerence =function($index){
                       $scope.newgwt($index);
                     }
               })
-        }
+        }else{
+                   $http.get('/getComboBarcode'+$scope.userit[$index].barcodeNumber).success(function(response){
+                          console.log(response);
+                          var ComboBarcodeGwt = response[0].gwt;
+                          var ComboBarcodeGpcs = response[0].gpcs;
+                          console.log(ComboBarcodeGwt);
+                          console.log(ComboBarcodeGpcs);
+                          //$scope.userit[$index].orderStatus = "available";
+                          if($scope.userit[$index].gwt > ComboBarcodeGwt ){
+                                 $scope.userit[$index].gwt = response[0].gwt;
+                                 // $scope.item.gwt = 100;
+                                 // alert($scope.userit[$index].gwt);
+                                 alert("the weight is greater then the limit");
+                      
+                                 $scope.newgwt($index);
+                          }
+                           if($scope.userit[$index].gpcs > ComboBarcodeGpcs ){
+                                 $scope.userit[$index].gpcs = response[0].gpcs;
+                                 // $scope.item.gwt = 100;
+                                 // alert($scope.userit[$index].gwt);
+                                 alert("the Gpcs is greater then the limit");
+                      
+                                 $scope.newgwt($index);
+                          }
+                          //alert("res")
+                   }) 
+             }
         $scope.gpcsLimit($index)
 }
 //var wttolerance = null;
@@ -1919,18 +1945,14 @@ $scope.change = function( $index){
       $http.get('/getbar'+barcodenum).success(function(response)
          { 
               //console.log(" displaying object");
+              // if(response[0].comboItem == 'yes'){
+                 
+              //    $http.get('/getComboitem'+barcodenum).success(function(response){
+              //          // alert("got replay from comb0")
+              //    }) 
+              // }else{}
               use=response[0];
-            //   console.log(response)
-            //  console.log(response.length)
-            //  console.log(response[0].orderstatus)
-            //  //this is because barcode as two matches so this way doing
-            // console.log(response[response.length-1].orderStatus)
-            // use.orderStatus = response[response.length-1].orderStatus//to find the latest record   
-            //  //console.log(response[0]._id)
-            // // console.log("use")
-            //  // alert(use.orderStatus)
-            //   console.log(response)
-              //console.log(use.orderStatus);
+           
              console.log(response)
              console.log(response.length)
              console.log(response[0].orderstatus)
@@ -1940,12 +1962,17 @@ $scope.change = function( $index){
              //console.log(response[0]._id)
             // console.log("use")
              // alert(use.orderStatus)
+              if(response[0].comboItem == 'yes'){
+                use.orderStatus = "available";
+              }
+                 
               console.log(response)
-              if(use.orderStatus == "completed"){
+              if(use.orderStatus == "completed" &&  use.comboItem !='yes'){
                   $scope.userit[$index].barcodeNumber="";
 
-                }else if(use.orderStatus =="Inprogress"){            
+                }else if(use.orderStatus =="Inprogress"  &&  use.comboItem !='yes'){            
                   $scope.userit[$index].barcodeNumber="";
+                  //alert("in progresss")
                }else{
                      $scope.user[$index]=response[0];
                      if($scope.user[$index].split == "yes")
@@ -1959,7 +1986,8 @@ $scope.change = function( $index){
                         }
 
          
-                         $scope.userit[$index]=$scope.user[$index]
+                         $scope.userit[$index]=$scope.user[$index];
+                         $scope.userit[$index].salesPerson =$scope.usernamedetails ; 
                          //alert($scope.user[$index].purity)
                          console.log($scope.userit[$index])
                        // $scope.item.purity = 0;
@@ -1967,35 +1995,9 @@ $scope.change = function( $index){
                 //       $scope.itemSelect($scope.userit[$index].itemName,$index)
                        // $scope.userit[$index].irate = use.purity;
                         $scope.userit[$index].barcodeNumber = use.barcode 
-                       
-                       // alert(wttolerance)
-                      //  $scope.userit[$index].purity = $scope.user[$index].purity;
-                        // console.log(use.purity)
-                        //console.log($scope.userit[$index].purity)
-                       // $scope.userit[$index]._id = null;
-                       // alert( "check in the id "+$scope.userit[$index]._id )
-                        //for hsf name
-                      //  alert($scope.userit[$index].itemName)
-                        // $http.get('/itemsdatachange'+$scope.userit[$index].itemName).success(function(response){
-                        //        console.log(response)
-                        //        $scope.userit[$index].Hsc = response[0].Hsc
-                        //        // alert($scope.userit[$index].Hsc)
-                        //         //scope.userit[$index].Hsc)
-                        //         // alert("see response")
-                        //      });
+                       // combocheck
 
-
-
-                   
-                   // alert( $scope.userit[$index].barcodeNumber)
-                    
-                   // $scope.itemSelect($scope.userit[$index].itemName,$index)
-                  // $scope.itemSelect($scope.userit[$index].itemName)
-                    // console.log($scope.userit[$index]);
-                    // console.log( $scope.userit[$index].count); //added 13/4
-                    // console.log($scope.userit[$index].name = $scope.user[$index].iname);
-        //$scope.itemSelect($scope.userit[$index].itemName,$index)
-                    //purity issue
+                                 //purity issue
          for(let a=0;a<$scope.items.length;a++){
        
           if ($scope.userit[$index].itemName == $scope.items[a].Name){
@@ -2003,6 +2005,14 @@ $scope.change = function( $index){
                     console.log($scope.items[a].InvGroupName)
                     if ( $scope.items[a].comboItem == 'yes'){
                         $scope.userit[$index].comboItem = "yes";
+                         $http.get('/getComboBarcode'+$scope.userit[$index].barcodeNumber).success(function(response){
+                            $scope.userit[$index].gwt = response[0].gwt;
+                            $scope.userit[$index].gpcs = response[0].gpcs;
+                            if($scope.userit[$index].gwt == 0 ||$scope.userit[$index].gpcs == 0 ){
+                              $scope.userit[$index]="";
+                            }
+                            
+                         })
                        // alert("change comboitem in change"+$scope.userit[$index].comboItem)
                        }
                   $http.get('/itemdetails'+$scope.items[a].InvGroupName).success(function(response){
@@ -2185,7 +2195,7 @@ $scope.TransactionDetails = function( ){
        $http.get('/transdetails/'+update).success(function(response)
          { 
             console.log(response);
-            alert(response[0].voucherNo)
+            //alert(response[0].voucherNo)
             $scope.urd = response;
             var urdAdjustmentLength = $scope.urd.length;
             $scope.urdAdjustmentTotal = 0;
@@ -2380,14 +2390,20 @@ $scope.resu ;
                         // $scope.userit[i]._id = null;
                        // console.log($scope.userit[i]._id)
                        if($scope.userit[i].orderStatus == "available"){
-                            // alert("entered into orderstatus available")
+                            alert("entered into orderstatus available")
                              $scope.userit[i]._id = null;
                              //console.log($scope.userit[i]._id)
                              //console.log("available so insert")
                              $scope.userit[i].partyname=$scope.partyname;
                                // $scope.userit[i].stockPoint ="URD treasure"
-                             $scope.userit[i].StockInward = "no"
-                             $scope.userit[i].orderStatus = "Inprogress"
+                             $scope.userit[i].StockInward = "no" ;
+                              // if($scope.user[i].comboItem == "yes"){
+                              //     $scope.userit[i].orderStatus = "available";
+                               
+                              // }else{
+                                      $scope.userit[i].orderStatus = "Inprogress";
+                             
+                                  // }
                              
                              $http.post('/userit12',$scope.userit[i]).success(function(response)
                                   {
@@ -2409,8 +2425,8 @@ $scope.resu ;
                                    })
 
                         }else if($scope.userit[i].orderStatus == "Inprogress"){
-                                 // alert("entered into orderstatus Inprogress")
-                            
+                                  //alert("entered into orderstatus Inprogress")
+                                  $scope.userit[i].partyname= $scope.partyname;
                                   //console.log("Inprogress then update ")
                                   //console.log( $scope.userit[i].barcode)
                                   // if($scope.userit[i].barcode == undefined){
@@ -2419,6 +2435,8 @@ $scope.resu ;
                                 // var new1 = data+","+$scope.userit[i].orderStatus;
                                  $http.put('/useritupdate',$scope.userit[i]).success(function(response)
                                       {
+                             //             $http.post('/userit12',$scope.userit[i]).success(function(response)
+                             // {
                                                //$scope.result=response;
                                                 // $scope.userit[i] = response;
                                             
@@ -2426,7 +2444,7 @@ $scope.resu ;
                                               // console.log(response._id);
                                              //  arrcon.push($scope.userit[i]._id)
                                              //  console.log(arrcon);
-                                             //alert(arrcon)
+                                            //alert("reso "+response._id)
                                             $scope.getDetails();
                                       })
 
@@ -2583,7 +2601,7 @@ $scope.resu ;
                           //$scope.result = response;
                           console.log(response);
                          // alert("enterd into not null saleinv")
-                             window.sessionStorage.setItem("saleinvoicedata_id",response[0]._id);
+                           //  window.sessionStorage.setItem("saleinvoicedata_id",response[0]._id);
                     // window.sessionStorage.setItem("userids",JSON.stringify(arrcon));
                 
                      })
@@ -2833,55 +2851,89 @@ $scope.confirm = function(){
                         
            console.log($scope.user[i].itemName);
            //alert("combo "+$scope.user[i].comboItem)
-           $http.get('/checkofcomboitem/'+$scope.user[i].itemName).success(function(response) { 
-           
+          // $http.get('/checkofcomboitem/'+$scope.user[i].itemName).success(function(response) { 
+           if($scope.user[i].comboItem == "yes"){
                 //console.log("i got replay form confirm")
-                console.log(response);
-                console.log(response[0].comboItem);
-                // alert("check combo")
-                if(response[0].comboItem == "yes"){
-                
+                //console.log(response);
+               // console.log(response[0].comboItem);
+               //alert("check combo")
+               // if(response[0].comboItem == "yes"){
+                $http.get('/getComboBarcode'+$scope.user[i].barcodeNumber).success(function(response){
+                          console.log(response[0].gwt);
+                          console.log(response[0].gpcs);
+                          $scope.user[i].gwt = response[0].gwt -$scope.user[i].gwt;
+                          $scope.user[i].gpcs = response[0].gpcs - $scope.user[i].gpcs;
+                          console.log($scope.user[i].gwt);
+                          console.log($scope.user[i].gpcs);
+                         // if($scope.user[i].gwt == 0){
+                            // $scope.user[i].orderstatus = "completed";
+                            // var dataDelete =$scope.user[i]._id+","+$scope.user[i].orderstatus+","+ $scope.user[i].barcode;
+                            //       $http.post('/confirmtransaction/'+dataDelete).success(function(response) { 
+        
+                            //             console.log("i got replay form confirm")
+                            //             console.log(response);
+                            //             alert("deleted")
+                                        $http.put('/getComboBarcodeUpdate',$scope.user[i]).success(function(response) { 
+                                        
+                                                 console.log(response)
+                                                 alert("updated values in comboItem")
+                                                
+                                         })
+                                        
+                               //   })
+                         // }
+
+                          
+
+                })
+                   
+                      // $http.put('/useritupdate',$scope.user[i]).success(function(response) { 
+                                        
+                      //   console.log(response)
+                                                
+                      // })
                      // alert("response[0].comboItem == yes")
                      //updating the combo main barcode
-                     $http.get('/getbar'+$scope.user[i].barcodeNumber).success(function(response)  { 
+                     // $http.get('/getbar'+$scope.user[i].barcodeNumber).success(function(response)  { 
                        
-                            console.log(response[0])
-                            //console.log(combocheck)
-                            var combocheck = response[0]
+                     //        console.log(response[0])
+                     //        //console.log(combocheck)
+                     //        var combocheck = response[0]
                              
-                            //console.log(response[0].gpcs)
-                            console.log( combocheck.gpcs);
-                             console.log( combocheck.gwt);
-                             console.log( $scope.user[i].gpcs);
+                     //        //console.log(response[0].gpcs)
+                     //        console.log( combocheck.gpcs);
+                     //         console.log( combocheck.gwt);
+                     //         console.log( $scope.user[i].gpcs);
                             
-                            combocheck.gpcs = combocheck.gpcs -  $scope.user[i].gpcs;
-                            combocheck.gwt = combocheck.gwt - $scope.user[i].gwt;
-                            if(combocheck.gwt == 0){
-                              combocheck.orderStatus = "completed"
-                            }else{
-                                  combocheck.orderStatus = "available"
-                                 }
-                            console.log(combocheck.gpcs) 
-                            console.log(combocheck.gwt) 
-                            console.log($scope.user[i].gpcs) 
-                            console.log($scope.user[i].gwt) 
+                     //        combocheck.gpcs = combocheck.gpcs -  $scope.user[i].gpcs;
+                     //        combocheck.gwt = combocheck.gwt - $scope.user[i].gwt;
+                     //        if(combocheck.gwt == 0){
+                     //          combocheck.orderStatus = "completed"
+                     //        }else{
+                     //              combocheck.orderStatus = "available"
+                     //             }
+                     //        console.log(combocheck.gpcs) 
+                     //        console.log(combocheck.gwt) 
+                     //        console.log($scope.user[i].gpcs) 
+                     //        console.log($scope.user[i].gwt) 
 
-                            console.log(combocheck) 
-                            // this is for updating the existing barcode
-                            $http.put('/useritupdate',combocheck).success(function(response) { 
+                     //        console.log(combocheck) 
+                     //        // this is for updating the existing barcode
+                     //        $http.put('/useritupdate',combocheck).success(function(response) { 
                                         
-                                          console.log(response)
+                     //                      console.log(response)
                                                 
-                             })
+                     //         })
 
                   
-                      }) //'/getbar'
+                     //  }) //'/getbar'
                    
 
 
 
-                }//if loop response[0].comboItem == "yes"
-           }) //checkofcomboitem
+               // }//if loop response[0].comboItem == "yes"
+              }
+          // }) //checkofcomboitem
 
            if($scope.user[i].split == "yes"){
              console.log(" true")
@@ -3014,19 +3066,27 @@ $scope.confirm = function(){
                   // var data =$scope.user[i]._id+","+$scope.user[i].orderstatus+","+ $scope.user[i].barcode+","+$scope.user[i].date
              
                   console.log(data)
-                  alert(data)
-                  if( $scope.user[i].comboItem != 'yes'){
+                  // alert(data)
+                 // if( $scope.user[i].comboItem != 'yes'){
                         console.log('$scope.user[i].comboItem ') 
                         $http.post('/confirmtransaction/'+data).success(function(response) { 
         
                               console.log("i got replay form confirm")
-                              console.log(response);
+                              //alert("deleferer "+response);
                               // $scope.resul=response;
                               // console.log($scope.resul);
+                             //  if( $scope.user[i].comboItem == 'yes'){
+                             //            $http.put('/getComboBarcodeUpdate',$scope.user[i]).success(function(response) { 
+                                        
+                             //                     console.log(response)
+                             //                    // alert("updated values in comboItem")
+                                                
+                             //             })
+                             // }
                         })
-                  }else{
-                          console.log('$scope.user[i].comboItem '+$scope.user[i].comboItem)
-                       }
+                  // }else{
+                  //         console.log('$scope.user[i].comboItem '+$scope.user[i].comboItem)
+                  //      }
        } //for
 
             //urd status update  for adjustment values
@@ -3670,6 +3730,7 @@ function($scope,$http,$window){
                  objUrd["urdDate"] = response[0].date ;
                  $scope.urdDetails.push(objUrd);
                  console.log($scope.urdDetails)
+                 //if more then 1 then add loop
                  $scope.urdDetails1 = $scope.urdDetails[0] ;
                  //alert($scope.urdVoucherNo,$scope.urdDate)
                  // console.log( $scope.userdisplay[l])

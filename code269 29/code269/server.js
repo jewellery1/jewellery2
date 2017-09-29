@@ -2,6 +2,7 @@
 var express=require('express');
 var app=express();
 var mongojs=require('mongojs');
+var mongoose       = require('mongoose');
 var db=mongojs('inventory',['user','tags','transaction','saleinvoice','mode','transactiondetail','batch','bank',
   'transactionSeriesInvoice','itemrate','item','menu','order','useritem','purity','uom','pct','labcal','useradj',
   'barcodesumm','stockpointmaster','configurations','inventorygroupmaster','salescategorymaster','itemtype','taxrate',
@@ -9,6 +10,12 @@ var db=mongojs('inventory',['user','tags','transaction','saleinvoice','mode','tr
 
 
 var bodyParser=require('body-parser');
+
+//var app            = express();
+//var mongoose       = require('mongoose');
+var bodyParser     = require('body-parser');
+var methodOverride = require('method-override');
+var bson = require('bson');
 
 
 app.use(express.static('public'));
@@ -120,48 +127,48 @@ app.get('/bardata',function(req,res)
 
 // prn file generation
 
-app.post('/prn',function(req,res)
-{
-  //console.log("prn function prn function")
-  var ItemName =req.body.itemName;
-  if(ItemName == "Big Chain"){
-    var path = 'sample/prntext.txt';
-    var path1 = 'sample/prnfile.prn';
-  } else if(ItemName == "Bangales"){
-    var path = 'sample/prnbangalestext.txt';
-    var path1 = 'sample/prnbangalesfile.prn';
-  }else if(ItemName == "Gold Ring"){
-    var path = 'sample/prngoldringtext.txt';
-    var path1 = 'sample/prngoldringfile.prn';
-  }
+// app.post('/prn',function(req,res)
+// {
+//   //console.log("prn function prn function")
+//   var ItemName =req.body.itemName;
+//   if(ItemName == "Big Chain"){
+//     var path = 'sample/prntext.txt';
+//     var path1 = 'sample/prnfile.prn';
+//   } else if(ItemName == "Bangales"){
+//     var path = 'sample/prnbangalestext.txt';
+//     var path1 = 'sample/prnbangalesfile.prn';
+//   }else if(ItemName == "Gold Ring"){
+//     var path = 'sample/prngoldringtext.txt';
+//     var path1 = 'sample/prngoldringfile.prn';
+//   }
   
 
-  var http = require('http');
-  fs = require('fs')
-  fs.readFile(path, 'utf8', function (err,data) {
-      if (err) {
-         return console.log(err);
-      }
-    var ItemName =req.body.itemName;
-    var barcode = req.body.barcode;
-    var result = data.replace(/Item NameOrCategory/g, ItemName);
-    var result1 =result.replace(/12345678/g, barcode);
+//   var http = require('http');
+//   fs = require('fs')
+//   fs.readFile(path, 'utf8', function (err,data) {
+//       if (err) {
+//          return console.log(err);
+//       }
+//     var ItemName =req.body.itemName;
+//     var barcode = req.body.barcode;
+//     var result = data.replace(/Item NameOrCategory/g, ItemName);
+//     var result1 =result.replace(/12345678/g, barcode);
     
-      fs.writeFile(path1, result1, 'utf8', function (err) {
-           if (err) return console.log(err);
+//       fs.writeFile(path1, result1, 'utf8', function (err) {
+//            if (err) return console.log(err);
 
-     //this for batch file and print command
-              require('child_process').exec(__dirname + "/batchfile.bat", function (err, stdout, stderr) {
+//      //this for batch file and print command
+//               require('child_process').exec(__dirname + "/batchfile.bat", function (err, stdout, stderr) {
   
-                   if (err) {
-                     return console.log(err);
-                    }
+//                    if (err) {
+//                      return console.log(err);
+//                     }
 
-                  //  console.log(stdout);
-             });
-      });
-  });
-});
+//                   //  console.log(stdout);
+//              });
+//       });
+//   });
+// });
 // app.post('/print',function(req,res)
 // {
 // var http = require('http');
@@ -314,16 +321,50 @@ app.get('/getbar:barcodenum',function(req,res)
    // console.log("i received a get request from count");
     var tax = req.params.barcodenum;
    var tax1=parseInt(tax);
-    //console.log("here the replay is "+tax1);
-
-    //26/4db.batch.find({"barcode": tax1},function(err,doc){
-      //20/5  db.batch.find({"barcode": tax1},function(err,doc){
-    //db.transactiondetail.find({"barcode": tax1,"orderStatus":"available"},function(err,doc){     
-        //console.log(doc);
-    db.transactiondetail.find({"barcode": tax1},function(err,doc){     
-     
+  
+   // db.transactiondetail.find({"barcode": tax1},function(err,doc){     
+     db.transactiondetail.find({"barcode": tax1},function(err,doc){     
+      
         res.json(doc);
 })
+})
+
+app.get('/codeDetails:barcodenum',function(req,res)
+{
+    console.log("i received a get request from count");
+    var barcoded = req.params.barcodenum;
+   barcoded=parseInt(barcoded);
+  
+   // db.transactiondetail.find({"barcode": tax1},function(err,doc){     
+     db.transactiondetail.find({"barcode": barcoded, "orderStatus" : "completed","Transaction" : "Regular Sale"},function(err,doc){     
+      
+        res.json(doc);
+})
+})
+//combo
+// barcode data
+app.get('/getComboitem:barcodenum',function(req,res)
+{
+   // console.log("i received a get request from count");
+    var tax = req.params.barcodenum;
+   var tax1=parseInt(tax);
+  
+   // db.transactiondetail.find({"barcode": tax1},function(err,doc){     
+     db.transactiondetail.find({ "comboBarcode" : tax1},function(err,doc){     
+      
+        res.json(doc);
+})
+})
+app.get('/getComboBarcode:barcodenum',function(req,res){
+
+    console.log("i received a get request from count getComboBarcode getComboBarcode getComboBarcode getComboBarcode");
+    var tax = req.params.barcodenum;
+   var tax1=parseInt(tax);
+  
+    db.transactiondetail.find({"comboBarcode": tax1},function(err,doc){     
+        console.log("getComboBarcode")
+        res.json(doc);
+      })
 })
 
 app.get('/getInvAccNo:invGroupName',function(req,res)
@@ -964,6 +1005,32 @@ app.post('/transactionstockInward',function(req,res)
        res.json(doc);    
 })
 })
+
+app.post('/transactionComboItemInsert',function(req,res)
+{
+        // delete(req.body.Transaction)
+        delete(req.body.orderStatus)
+        req.body.StockInward = "no";
+        req.body.refid = req.body.barcode ;
+        delete( req.body.orderstatus)
+        req.body.comboBarcode = req.body.barcode ;
+         //req.body.barcode = ""
+         delete( req.body.barcode)
+        delete( req.body.voucherClass)
+        delete( req.body.irate)
+        delete( req.body.voucherClassId) 
+        delete( req.body.transactionTypeId )
+        delete( req.body.invGroupName )
+        delete( req.body.invGroupAccNo )
+        delete( req.body.voucherDate)
+        delete( req.body.voucherTime )
+        req.body.ntwt  = parseFloat(req.body.ntwt)
+        req.body.gwt  = parseFloat(req.body.gwt)
+        req.body.gpcs  = parseFloat(req.body.gpcs)
+      db.transactiondetail.insert(req.body,function(err,doc){
+       res.json(doc);    
+})
+})
 // for transaction details collection in inventory
 app.get('/transactiondetails',function(req,res)
 {
@@ -1498,12 +1565,13 @@ var str=req.params.update;
 app.post('/userit12',function(req,res)
 {
   //console.log(req.body);
-   // console.log("entered into put request $scope.userit[i]._id!=null +++++++=====+++++");
+    console.log("entered into put request $scope.userit[i]._id!=null +++++++=====+++++");
        console.log(req.body.gwt);
         console.log(req.body.gpcs);
       req.body.gpcs =  parseFloat(req.body.gpcs);
        req.body.gwt = parseFloat(req.body.gwt);
          req.body.voucherNo = null; 
+       //  delete(req.body._id)
    db.transactiondetail.insert(req.body,function(err,doc){
    
      if(err)
@@ -1548,23 +1616,24 @@ app.put('/useritupdate',function(req,res)
             res.json(doc);
         
         });  
-     
-   
-  // }
-   // else{
-   //  console.log("defined previsly")
-   //  console.log("code1 the code is lok here eeeeeeeeeeeeeeeeeeeeeeeeeeeee "+bar)
-   // console.log("code"+code1)
-   // console.log("bar"+bar)
-   //  db.transactiondetail.update({_id:id},{$set:{"Transaction":tran,"barcode":bar,"chgunt":chgunt,"date":date,"desc":desc,"final":final,"gpcs":gpcs,"gwt":gwt,
-   //      "name":iname,"ntwt":ntwt,"partyname":partyname,"rate":rate,"size":size,"taxval":taxval1,"taxamt":taxamt1,"stwt":wt,"wastage":wastage,"stval":stval,
-   //      "labval":labval,"orderstatus":order,"StockInward":"no"}},function(err,doc){
-   
-     
-   //          res.json(doc);
-   //          console.log(doc);
-   //      })
-   //   }
+  
+});
+
+// for update of userit
+app.put('/getComboBarcodeUpdate',function(req,res)
+{
+   console.log("getComboBarcodeUpdate getComboBarcodeUpdate getComboBarcodeUpdate getComboBarcodeUpdate getComboBarcodeUpdate")
+    var barcode = req.body.barcode;
+       // console.log(req.body)
+       // console.log(req.body.barcode)
+  
+     db.transactiondetail.update({comboBarcode:barcode},{$set:{
+         "gpcs":req.body.gpcs,"gwt":req.body.gwt,"itemName":req.body.itemName}},function(err,doc)
+      
+        {
+            res.json(doc);
+        
+        });  
   
 });
 app.put('/saleinvoicedata12/:update',function(req,res)
@@ -3086,6 +3155,37 @@ app.get('/getLoginDetails',function(req,res)
        
     });
 });
-var port = process.env.PORT || 8080;
-app.listen(port );
-console.log("server running on port 8080");
+// var port = process.env.PORT || 8090;
+// app.listen(port)
+// console.log("server running on port 8090")
+//app.listen(9000);
+//console.log("server running on port 9000");
+var db1 = require('./config/db');
+
+//var port = process.env.PORT || 9000; // set our port
+
+mongoose.connect(db1.url, function(err, db) {
+  if (err) {
+    console.log("Connection to Database Failed");
+    throw err;
+  }
+  console.log("Connected to Database");
+});
+
+// get all data/stuff of the body (POST) parameters
+app.use(bodyParser.json({limit: '20mb'})); // parse application/json
+app.use(bodyParser.json({ type: 'application/vnd.api+json' })); // parse application/vnd.api+json as json
+app.use(bodyParser.urlencoded({limit: '20mb', extended: true}));// parse application/x-www-form-urlencoded
+
+app.use(methodOverride('X-HTTP-Method-Override')); // override with the X-HTTP-Method-Override header in the request. simulate DELETE/PUT
+app.use(express.static(__dirname + '/public')); // set the static files location /public/img will be /img for users
+app.use(express.static(__dirname + '/subscriber_images'));
+
+// routes ==================================================
+require('./app/routes')(app); // pass our application into our routes
+
+// start app ===============================================
+app.listen(9100); 
+//console.log('Listening on port ' + port);       // shoutout to the user
+console.log("server running on port 9100");
+exports = module.exports = app;

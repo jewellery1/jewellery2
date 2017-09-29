@@ -1,4 +1,4 @@
 module.exports = {
-	url : 'mongodb://localhost/chitfund'
+	url : 'mongodb://localhost/inventory'
 	//url : 'mongodb://localhost/test'
 }
